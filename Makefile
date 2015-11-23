@@ -1,13 +1,9 @@
 url_prefix=http://string-db.org/newstring_download/
 data_files=$(addprefix data/,protein.links.detailed.v10.txt.gz protein.aliases.v10.txt.gz species.v10.txt entrez2symbol.txt)
 
-interactomes: build_R_network.R data/edge_files data/entrez2symbol.txt
+interactomes: data/entrez2symbol.txt $(data_files)
 	mkdir -p output
-	Rscript $<
-
-data/edge_files: $(data_files) 
-	zcat data/protein.links.detailed.v10.txt.gz | ./filter_links.pl 800 | ./extract_species_networks.py ../GeneSets/organisms $(@D)
-	touch $@
+	zcat data/protein.links.detailed.v10.txt.gz | ./filter_links.pl 750 | ./extract_species_networks.py ../GeneSets/organisms | Rscript build_R_network.R
 
 data/species.v10.txt:    
 	mkdir -p $(@D)
@@ -24,7 +20,7 @@ data/gene_info.gz:
 	mkdir -p $(@D)
 	wget --quiet -P $(@D) -nd ftp://ftp.ncbi.nlm.nih.gov/gene/DATA/gene_info.gz
 
-.INTERMEDIATE: $(data_files)
+.INTERMEDIATE: $(data_files) data/gene_info.gz
 
 clean:
-	rm -fr data output
+	rm -fr data 

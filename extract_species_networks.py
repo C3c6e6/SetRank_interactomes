@@ -25,14 +25,6 @@ def getTaxIDs(fileName, organismFileName):
                 break
     return taxIDs
             
-def createOutputFiles(taxIDDict, outDir):
-    pattern = re.compile(r'\W+')
-    files = dict()
-    for taxID, name in taxIDDict.items():
-        fileName = "%s/%s.edges.txt" % ( outDir, pattern.sub(".", name) )
-        files[taxID] = file(fileName, 'w')
-    return files
-
 def getOrganismNodeIDs(fileName, taxIDDict):
     entrezPattern = re.compile(r'^\d+$')
     taxIDPattern = re.compile(r'^(\d+)\.')
@@ -58,10 +50,8 @@ def getOrganismNodeIDs(fileName, taxIDDict):
 #===============================================================================
 display = sys.stderr.write
 proteinAliasFileName = "data/protein.aliases.v10.txt.gz"
-#proteinAliasFileName = "data/human_aliases.txt"
 speciesFileName = "data/species.v10.txt"
 organismFileName = sys.argv[1]
-outDir = sys.argv[2]
 
 display("Looking up taxonomy ID...")
 taxIDs = getTaxIDs(speciesFileName, organismFileName)
@@ -73,17 +63,15 @@ display("\nExtracting network ")
 edgesSeen = set()
 outFields = ["protein1", "protein2", "neighborhood", "fusion", "cooccurence", 
         "coexpression", "experimental", "database", "textmining", 
-        "combined_score"]
+        "combined_score", "organism"]
+print >>sys.stdout, str.join("\t", outFields)
 
-outputFiles = createOutputFiles(taxIDs, outDir)
-for f in outputFiles.values():
-    print >>f, str.join("\t", outFields)
 for record in csv.DictReader(sys.stdin, delimiter=" ", fieldnames=outFields):
     if record["protein1"] not in node2EntrezID or record["protein2"] not in node2EntrezID:
         continue
     if node2TaxID[record["protein1"]] != node2TaxID[record["protein2"]]:
         continue
-    taxID = node2TaxID[record["protein1"]]
+    record["organism"] = taxIDs[node2TaxID[record["protein1"]]]
     record["protein1"] = node2EntrezID[record["protein1"]]
     record["protein2"] = node2EntrezID[record["protein2"]]
     edgeTuple = tuple(sorted((record["protein1"], record["protein2"])))
@@ -92,8 +80,6 @@ for record in csv.DictReader(sys.stdin, delimiter=" ", fieldnames=outFields):
     edgesSeen.add(edgeTuple)
     if len(edgesSeen) % 10000 == 0:
         display(".")
-    print >>outputFiles[taxID], str.join("\t", [ record[f] for f in outFields ] )
+    print >>sys.stdout, str.join("\t", [ record[f] for f in outFields ] )
 display("\n%d edges written.\n" % len(edgesSeen))
-for f in outputFiles.values():
-    f.close()
 
