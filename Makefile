@@ -3,7 +3,7 @@ data_files=$(addprefix data/,protein.links.detailed.v10.txt.gz protein.aliases.v
 
 interactomes: data/entrez2symbol.txt $(data_files)
 	mkdir -p output
-	zcat data/protein.links.detailed.v10.txt.gz | perl filter_links.pl 750 | python extract_edges_per_species.py ../GeneSets/organisms | Rscript build_interactomes.R
+	zcat data/protein.links.detailed.v10.txt.gz | perl filter_links.pl 750 | python extract_edges_per_species.py organisms | Rscript build_interactomes.R
 
 data/species.v10.txt:    
 	mkdir -p $(@D)
