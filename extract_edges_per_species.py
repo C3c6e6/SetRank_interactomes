@@ -13,10 +13,10 @@ def openFile(fileName):
         cmdArgs = [ "zcat" , fileName ]
         return subprocess.Popen(cmdArgs, stdout=subprocess.PIPE).stdout
     else:
-        return file(fileName)
+        return open(fileName)
 
 def getTaxIDs(fileName, organismFileName):
-    organisms = set([ l.strip() for l in file(organismFileName) ])
+    organisms = set([ l.strip() for l in open(organismFileName) ])
     taxIDs = dict()
     for record in csv.DictReader(openFile(fileName), delimiter="\t"):
         for nameField in ("STRING_name_compact", "official_name_NCBI"):
@@ -49,9 +49,9 @@ def getOrganismNodeIDs(fileName, taxIDDict):
 # Main
 #===============================================================================
 display = sys.stderr.write
-proteinAliasFileName = "data/protein.aliases.v10.txt.gz"
-speciesFileName = "data/species.v10.txt"
-organismFileName = sys.argv[1]
+proteinAliasFileName = sys.argv[1]
+speciesFileName = sys.argv[2]
+organismFileName = sys.argv[3]
 
 display("Looking up taxonomy ID...")
 taxIDs = getTaxIDs(speciesFileName, organismFileName)
