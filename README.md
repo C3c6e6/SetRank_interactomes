@@ -6,7 +6,7 @@ A set of scripts to build interactome objects for use with the SetRank package.
 This set of scripts should work on any basic Linux / Mac OS X installation. You need to have the following installed:
 * GNU Make
 * The `wget` utility
-* Python 2.7 or later
+* Python 2.7 (Python 3.x will not work!)
 * Perl 5.16 (earlier versions will probably work as well)
 * R version 3.1.1 or later with the [igraph](http://igraph.org/r/) module installed
 
